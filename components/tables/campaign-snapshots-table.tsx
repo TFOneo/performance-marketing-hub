@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ratingBadge } from "@/components/campaigns/rating-badge";
-import { deleteSnapshot } from "@/app/(app)/campaigns/actions";
+import { deleteSnapshot, rerateSnapshot } from "@/app/(app)/campaigns/actions";
 import type { RatingBand } from "@/lib/schemas/enums";
 
 const formatUsd = (n: number) =>
@@ -49,11 +49,9 @@ export interface CampaignSnapshotRow {
 export function CampaignSnapshotsTable({
   rows,
   campaignId,
-  onRerate,
 }: {
   rows: CampaignSnapshotRow[];
   campaignId: string;
-  onRerate?: (snapshotId: string) => void;
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -72,6 +70,14 @@ export function CampaignSnapshotsTable({
     startTransition(async () => {
       const result = await deleteSnapshot(id, campaignId);
       if (result.ok) toast.success("Snapshot deleted");
+      else toast.error(result.error);
+    });
+  };
+
+  const onRerate = (id: string) => {
+    startTransition(async () => {
+      const result = await rerateSnapshot(id);
+      if (result.ok) toast.success("Re-rated");
       else toast.error(result.error);
     });
   };
@@ -104,11 +110,12 @@ export function CampaignSnapshotsTable({
                   <MoreHorizontalIcon className="size-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {onRerate && row.ai_rating_score === null && (
-                    <DropdownMenuItem onClick={() => onRerate(row.id)}>
-                      Re-rate
-                    </DropdownMenuItem>
-                  )}
+                  <DropdownMenuItem
+                    disabled={isPending}
+                    onClick={() => onRerate(row.id)}
+                  >
+                    {row.ai_rating_score === null ? "Rate" : "Re-rate"}
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     variant="destructive"
                     disabled={isPending}

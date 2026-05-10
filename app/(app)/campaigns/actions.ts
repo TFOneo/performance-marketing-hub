@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { rateCampaignSnapshot } from "@/lib/anthropic/rate-campaign";
 import {
   campaignInputSchema,
   campaignUpdateSchema,
@@ -125,11 +126,23 @@ export async function addSnapshot(
     return { ok: false, error: error?.message ?? "Could not save snapshot" };
   }
 
-  // M6 will wire AI rating here. For now, no rating runs.
+  // Best-effort: save first, then call AI. Failure leaves the row with null rating;
+  // user can press "Re-rate" from the snapshot card.
+  const ratingResult = await rateCampaignSnapshot(data.id);
+
   revalidatePath(`/campaigns/${parsed.data.campaign_id}`);
   revalidatePath("/campaigns");
   revalidatePath("/");
-  return { ok: true, data: { id: data.id, rated: false } };
+  return { ok: true, data: { id: data.id, rated: ratingResult.ok } };
+}
+
+export async function rerateSnapshot(snapshotId: string): Promise<ActionResult> {
+  const userId = await currentUserId();
+  if (!userId) return { ok: false, error: "Not authenticated" };
+
+  const result = await rateCampaignSnapshot(snapshotId);
+  if (!result.ok) return { ok: false, error: result.error };
+  return { ok: true };
 }
 
 export async function deleteSnapshot(
