@@ -34,6 +34,16 @@ export const ReallocationResponseSchema = z
   })
   .strict();
 
+export const BriefResponseSchema = z
+  .object({
+    headline: z.string().min(10).max(300),
+    improved: z.array(z.string().min(5).max(400)).max(5),
+    worsened: z.array(z.string().min(5).max(400)).max(5),
+    investigate: z.array(z.string().min(5).max(400)).max(5),
+  })
+  .strict();
+
 export type RatingResponse = z.infer<typeof RatingResponseSchema>;
 export type ReallocationMove = z.infer<typeof ReallocationMoveSchema>;
 export type ReallocationResponse = z.infer<typeof ReallocationResponseSchema>;
+export type BriefResponse = z.infer<typeof BriefResponseSchema>;

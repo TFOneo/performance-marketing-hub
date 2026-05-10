@@ -199,3 +199,7 @@ UI: `/budget` shows a `ReallocationPanel` under the grid with the latest run's s
 - `app/global-error.tsx` and root-level `app/not-found.tsx` cover errors outside the `(app)` group
 - Deploy checklist documented above (Vercel env vars, Supabase auth redirect URLs, deployment protection)
 - Per-route loading skeletons live in `app/(app)/loading.tsx`; mutations use sonner toasts; route boundaries handle errors
+
+### M12 — /insights brief
+
+`/insights` is a single-page client component with one button: "Brief me on this week". Calls `briefMeOnThisWeek` server action → `lib/anthropic/brief.ts:generateWeeklyBrief` aggregates last 4 weeks vs the prior 4 (per platform×country) plus the most recent campaign ratings, builds a fenced-JSON user prompt, calls `callJson` with `BriefResponseSchema`. Renders a headline card and three lists — Improved (success colour), Worsened (destructive), Investigate (gold) — each up to 5 bullets.

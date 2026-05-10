@@ -8,6 +8,7 @@ import {
   MegaphoneIcon,
   KanbanIcon,
   WalletIcon,
+  SparklesIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -48,6 +49,12 @@ const NAV: NavItem[] = [
     label: "Budget",
     icon: WalletIcon,
     match: (p) => p === "/budget" || p.startsWith("/budget/"),
+  },
+  {
+    href: "/insights",
+    label: "Insights",
+    icon: SparklesIcon,
+    match: (p) => p === "/insights",
   },
 ];
 
