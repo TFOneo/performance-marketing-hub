@@ -13,7 +13,7 @@ This is a draft tool for internal use, not a regulated client deliverable. All A
 - Recharts · React Hook Form + Zod · TanStack Table · date-fns
 - Hosted on Vercel (region `fra1`); deploys from `main`
 
-## Setup
+## Local setup
 
 ```bash
 # Install pnpm via Node 22's bundled corepack
@@ -32,6 +32,46 @@ pnpm db:types       # regenerates lib/supabase/database.types.ts
 
 pnpm dev            # http://localhost:3000
 ```
+
+**Supabase Auth dashboard config (manual, one-off):**
+- Authentication → URL Configuration → Site URL: production Vercel URL
+- Authentication → URL Configuration → Redirect URLs: add both
+  - `http://localhost:3000/auth/callback`
+  - `https://<your-vercel-url>/auth/callback`
+
+## Deploy
+
+```bash
+# Create a private GitHub repo and push
+git remote add origin git@github.com:<owner>/<repo>.git
+git push -u origin main
+
+# In Vercel:
+# 1. Import the repo
+# 2. Framework preset: Next.js (auto-detected)
+# 3. Region: fra1 (set in vercel.json)
+# 4. Environment variables (Production + Preview):
+#    NEXT_PUBLIC_SUPABASE_URL
+#    NEXT_PUBLIC_SUPABASE_ANON_KEY
+#    SUPABASE_SERVICE_ROLE_KEY
+#    ANTHROPIC_API_KEY
+#    ALLOWED_EMAIL
+# 5. Settings → Deployment Protection → enable Vercel Authentication or password
+#    (this is an internal tool — don't leave it publicly indexable)
+
+# Apply migration to the production Supabase project
+pnpm exec supabase link --project-ref <prod-project-ref>
+pnpm db:push
+pnpm db:types  # commit the regenerated types if they differ
+```
+
+**End-to-end smoke test on the live URL:**
+1. Sign in with magic link (any other email is rejected before sending)
+2. Add a 12-row week of funnel data via Bulk add
+3. Create a campaign, upload a snapshot — AI rating should land within ~10s
+4. Create a project with markdown notes and link the campaign
+5. Set a planned amount on /budget, generate reallocation, Apply one move
+6. Reload — all changes persist
 
 ## Scripts
 
@@ -152,3 +192,10 @@ UI: `/budget` shows a `ReallocationPanel` under the grid with the latest run's s
 - `getRecentActivity` — last 5 funnel rows + last 3 campaign uploads with name lookup
 
 `/` is RSC-fetched in parallel via `Promise.all`. Renders 5 KPI tiles (spend, leads, SAL1, cost/SAL1, clients), two-column charts (`CostPerSal1Chart` line by platform, `LeadsByCountryChart` stacked bar by country), top/bottom campaigns side-by-side, and recent activity card. Empty states throughout.
+
+### M11 — Polish
+
+- `app/robots.ts` denies all indexing — this is an internal tool
+- `app/global-error.tsx` and root-level `app/not-found.tsx` cover errors outside the `(app)` group
+- Deploy checklist documented above (Vercel env vars, Supabase auth redirect URLs, deployment protection)
+- Per-route loading skeletons live in `app/(app)/loading.tsx`; mutations use sonner toasts; route boundaries handle errors
