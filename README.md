@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# TFO Performance Marketing Hub
 
-## Getting Started
+Private, single-user internal dashboard for performance marketing operations at The Family Office. Tracks weekly funnel data, campaigns, marketing projects, and budgets across three platforms × four GCC countries — with on-demand Anthropic-backed campaign ratings and budget reallocation suggestions.
 
-First, run the development server:
+This is a draft tool for internal use, not a regulated client deliverable. All AI calls are server-side; no client data flows through it.
+
+## Stack
+
+- Next.js 16 (App Router, RSC) · TypeScript strict
+- Supabase (Postgres + Auth) via `@supabase/ssr`
+- Anthropic SDK with model `claude-sonnet-4-6`
+- Tailwind CSS v4 + shadcn/ui (Base UI primitives)
+- Recharts · React Hook Form + Zod · TanStack Table · date-fns
+- Hosted on Vercel (region `fra1`); deploys from `main`
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Install pnpm via Node 22's bundled corepack
+corepack enable && corepack prepare pnpm@latest --activate
+
+pnpm install
+
+cp .env.example .env.local
+# fill in NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
+#         SUPABASE_SERVICE_ROLE_KEY, ANTHROPIC_API_KEY, ALLOWED_EMAIL
+
+pnpm exec supabase login
+pnpm exec supabase link --project-ref <project-ref>
+pnpm db:push        # applies supabase/migrations/0001_init.sql
+pnpm db:types       # regenerates lib/supabase/database.types.ts
+
+pnpm dev            # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `pnpm dev` — local dev server (Turbopack)
+- `pnpm build` — production build
+- `pnpm start` — production server
+- `pnpm lint` — ESLint
+- `pnpm typecheck` — `tsc --noEmit`
+- `pnpm format` — Prettier write
+- `pnpm db:push` — apply migrations to linked Supabase project
+- `pnpm db:types` — regenerate Supabase types
+- `pnpm db:reset` — reset linked DB (destructive — be careful)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Auth
 
-## Learn More
+Magic-link only via Supabase. The single allowed login email is set via the `ALLOWED_EMAIL` env var and enforced in three places:
+1. The `/login` server action rejects the request before calling Supabase.
+2. The `/auth/callback` route re-checks after code exchange and signs out on mismatch.
+3. The middleware enforces it on every `(app)` route as defense-in-depth.
 
-To learn more about Next.js, take a look at the following resources:
+Configure the Supabase Auth dashboard with redirect URLs for both `http://localhost:3000/auth/callback` and the production Vercel domain. Avoid wildcard previews; restrict auth-required testing to production deploys.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Design decisions
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Develop against cloud Supabase** (no Docker / local stack) — single dev, simpler ops.
+- **Single `0001_init.sql` migration for v1**; future feature changes get `0002_*.sql`, etc.
+- **Vercel region `fra1`** (Frankfurt — closest to GCC).
+- **Anthropic model pinned in code** as a constant, not env-driven, so model upgrades are deliberate PRs.
+- **RLS via simple `user_id = auth.uid()`** per the brief; no GUC indirection.
+- **`temperature: 0`** for both AI prompts — score stability across re-runs is a product requirement.
+- **Apply reallocation via Postgres function** for atomicity (`SELECT ... FOR UPDATE` + status guard).
+- **No tests for v1**; manual milestone verification per brief.
+- **Inter (not Gotham)** for typography — Gotham Light is desktop-licensed only and cannot be embedded.
 
-## Deploy on Vercel
+## Build log
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### M1 — Bootstrap
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Scaffolded Next.js 16 + Tailwind v4 via `create-next-app`. Installed core deps: Supabase SSR/JS, Anthropic SDK, RHF + Zod, TanStack Table, Recharts, date-fns, shadcn primitives (Base UI), sonner, MD editor. Wired TFO design tokens into `globals.css` mapped onto shadcn semantic tokens. Set up Prettier, env-var Zod loader, vercel.json (region `fra1`).

@@ -1,26 +1,102 @@
 @import "tailwindcss";
 
+/* TFO design tokens. Source of truth — do not hard-code colours elsewhere. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand-gold: #c4a951;
+  --brand-black: #000000;
+  --bg: #ffffff;
+  --surface: #fafafa;
+  --border: #e5e5e5;
+  --muted: #6b6b6b;
+  --success: #4db87a;
+  --steel: #5b7f8f;
+  --purple: #6b4a7e;
+  --mauve: #8e5470;
+  --destructive: #b83a4d;
+
+  /* Semantic tokens — what shadcn components consume. Mapped onto TFO palette. */
+  --background: var(--bg);
+  --foreground: var(--brand-black);
+  --card: var(--bg);
+  --card-foreground: var(--brand-black);
+  --popover: var(--bg);
+  --popover-foreground: var(--brand-black);
+  --primary: var(--brand-gold);
+  --primary-foreground: var(--brand-black);
+  --secondary: var(--surface);
+  --secondary-foreground: var(--brand-black);
+  --muted-foreground: var(--muted);
+  --accent: var(--surface);
+  --accent-foreground: var(--brand-black);
+  --destructive-foreground: #ffffff;
+  --input: var(--border);
+  --ring: var(--brand-gold);
+  --radius: 0.375rem;
+  --radius-md: 0.375rem;
+
+  color-scheme: light;
 }
 
 @theme inline {
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-black: var(--brand-black);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-success: var(--success);
+  --color-steel: var(--steel);
+  --color-purple: var(--purple);
+  --color-mauve: var(--mauve);
+
+  /* shadcn semantic tokens exposed as Tailwind utilities */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --radius: 0.375rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Headers light, body normal — TFO typographic rhythm. */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 400;
+}
+
+h1, h2, h3 {
+  font-weight: 300;
+  color: var(--brand-black);
+  letter-spacing: -0.01em;
+}
+
+h4, h5, h6 {
+  font-weight: 400;
+  color: var(--brand-black);
+}
+
+/* Custom chart palette — gold → steel → success → black → purple → mauve */
+:root {
+  --chart-1: var(--brand-gold);
+  --chart-2: var(--steel);
+  --chart-3: var(--success);
+  --chart-4: var(--brand-black);
+  --chart-5: var(--purple);
+  --chart-6: var(--mauve);
 }
