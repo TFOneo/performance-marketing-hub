@@ -127,3 +127,9 @@ The campaigns `addSnapshot` action now does **save → rate → return `{ rated:
 UI: `/projects` is a Tabs container with two views over the same data — a 4-column kanban (`KanbanBoard` with native HTML5 drag, no extra library) where dragging a card across columns calls `moveProjectStatus`, and a list view (`ProjectList` table) for keyboard-friendly browsing. Cards show title, owner, due date (overdue → destructive colour), progress bar (gold), and linked-campaign count.
 
 `/projects/[id]` detail page composes `ProjectDetailForm` (client) — title/owner/status/due-date/progress slider in one card, `@uiw/react-md-editor` for `notes_markdown` (dynamic-imported, SSR off), and a checkbox grid of campaigns to link/unlink. Single "Save changes" persists everything; separate "Delete project" with confirm.
+
+### M8 — Budgets
+
+`lib/schemas/budget.ts` Zod for upsert. `lib/utils/month.ts` for month helpers. `app/(app)/budget/actions.ts:upsertBudget` upserts on `(user_id, month, platform, country)`.
+
+`/budget?month=YYYY-MM-01` is RSC-fetched: pulls planned rows from `budgets` and actual rows from the `monthly_actuals` view, merges into a 3×4 cells map. `BudgetGrid` (client) renders a table with editable planned inputs (save on blur), read-only actuals, and variance (green when actual ≤ planned, red when over). Includes platform totals (right column), country totals (bottom row), and a grand total. Month picker rewrites `?month=…` via `router.push`.
