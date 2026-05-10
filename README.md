@@ -141,3 +141,14 @@ UI: `/projects` is a Tabs container with two views over the same data — a 4-co
 Successful runs are persisted to `reallocation_runs` with `status='pending'`. Apply uses the `apply_reallocation(p_run_id, p_move_index)` Postgres function (defined in 0001_init.sql) — `SELECT ... FOR UPDATE` on the run plus `status='pending'` guard makes double-apply impossible. Dismiss flips `status='dismissed'`.
 
 UI: `/budget` shows a `ReallocationPanel` under the grid with the latest run's summary, each move as a row with `From → To` arrow, shift amount badge (gold), confidence %, rationale, and per-move Apply button. `/budget/reallocations` lists the 50 most recent runs.
+
+### M10 — Overview dashboard
+
+`lib/utils/aggregations.ts` server-only helpers:
+- `getMtdKpis` — month-to-date totals
+- `getCostPerSal1Series` — 12-week per-platform line series with null-when-no-SAL1
+- `getLeadsByCountrySeries` — 12-week stacked-bar data
+- `getTopBottomCampaigns` — latest rated entry per campaign, top/bottom 5 by score
+- `getRecentActivity` — last 5 funnel rows + last 3 campaign uploads with name lookup
+
+`/` is RSC-fetched in parallel via `Promise.all`. Renders 5 KPI tiles (spend, leads, SAL1, cost/SAL1, clients), two-column charts (`CostPerSal1Chart` line by platform, `LeadsByCountryChart` stacked bar by country), top/bottom campaigns side-by-side, and recent activity card. Empty states throughout.
