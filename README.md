@@ -133,3 +133,11 @@ UI: `/projects` is a Tabs container with two views over the same data — a 4-co
 `lib/schemas/budget.ts` Zod for upsert. `lib/utils/month.ts` for month helpers. `app/(app)/budget/actions.ts:upsertBudget` upserts on `(user_id, month, platform, country)`.
 
 `/budget?month=YYYY-MM-01` is RSC-fetched: pulls planned rows from `budgets` and actual rows from the `monthly_actuals` view, merges into a 3×4 cells map. `BudgetGrid` (client) renders a table with editable planned inputs (save on blur), read-only actuals, and variance (green when actual ≤ planned, red when over). Includes platform totals (right column), country totals (bottom row), and a grand total. Month picker rewrites `?month=…` via `router.push`.
+
+### M9 — Reallocation suggestions
+
+`lib/anthropic/prompts/reallocation.ts` system prompt verbatim from brief plus user-prompt builder that wraps aggregated 4-week data and current-month budgets in a fenced JSON block. `lib/anthropic/suggest-reallocations.ts:generateReallocations` aggregates `weekly_funnel` rows into per-pair sums and ratios, joins to `budgets` + `monthly_actuals` to compute `remaining_monthly_budget`, calls `callJson` with `ReallocationResponseSchema` (max 5 moves), then **post-validates the 25% rule** in TS — rejects the whole run with a friendly error if any move exceeds `0.25 * remaining`.
+
+Successful runs are persisted to `reallocation_runs` with `status='pending'`. Apply uses the `apply_reallocation(p_run_id, p_move_index)` Postgres function (defined in 0001_init.sql) — `SELECT ... FOR UPDATE` on the run plus `status='pending'` guard makes double-apply impossible. Dismiss flips `status='dismissed'`.
+
+UI: `/budget` shows a `ReallocationPanel` under the grid with the latest run's summary, each move as a row with `From → To` arrow, shift amount badge (gold), confidence %, rationale, and per-move Apply button. `/budget/reallocations` lists the 50 most recent runs.

@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { PageHeader } from "@/components/layout/page-header";
 import { BudgetGrid } from "@/components/budget/budget-grid";
+import { ReallocationPanel, type RealRun } from "@/components/budget/reallocation-panel";
 import { createClient } from "@/lib/supabase/server";
 import { currentMonthISO, monthLabel, toMonthFirstISO } from "@/lib/utils/month";
 import {
@@ -19,17 +21,23 @@ export default async function BudgetPage({ searchParams }: BudgetPageProps) {
 
   const supabase = await createClient();
 
-  const { data: planned } = await supabase
-    .from("budgets")
-    .select("month, platform, country, planned_usd")
-    .eq("month", monthISO);
+  const [{ data: planned }, { data: actuals }, { data: latestRun }] = await Promise.all([
+    supabase
+      .from("budgets")
+      .select("month, platform, country, planned_usd")
+      .eq("month", monthISO),
+    supabase
+      .from("monthly_actuals")
+      .select("month, platform, country, actual_usd")
+      .eq("month", monthISO),
+    supabase
+      .from("reallocation_runs")
+      .select("id, generated_at, lookback_weeks, status, applied_move_index, payload")
+      .order("generated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
 
-  const { data: actuals } = await supabase
-    .from("monthly_actuals")
-    .select("month, platform, country, actual_usd")
-    .eq("month", monthISO);
-
-  // Build a 3x4 cells map from the two sources, defaulting to 0.
   type Cell = { planned: number; actual: number };
   const cells = {} as Record<Platform, Record<Country, Cell>>;
   for (const p of PLATFORMS) {
@@ -50,8 +58,22 @@ export default async function BudgetPage({ searchParams }: BudgetPageProps) {
       <PageHeader
         title={`Budget · ${monthLabel(monthISO)}`}
         description="Set planned spend per platform × country. Actuals come from weekly_funnel."
+        actions={
+          <Link
+            href="/budget/reallocations"
+            className="text-muted-foreground hover:text-foreground text-sm"
+          >
+            Past suggestions →
+          </Link>
+        }
       />
-      <BudgetGrid monthISO={monthISO} cells={cells} />
+
+      <div className="space-y-6">
+        <BudgetGrid monthISO={monthISO} cells={cells} />
+        <ReallocationPanel
+          latestRun={latestRun ? (latestRun as unknown as RealRun) : null}
+        />
+      </div>
     </div>
   );
 }
