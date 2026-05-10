@@ -119,3 +119,11 @@ UI: `/campaigns` list table with `NewCampaignDialog`. `/campaigns/[id]` detail p
 `lib/anthropic/rate-campaign.ts:rateCampaignSnapshot(snapshotId)` loads snapshot + campaign + benchmark, calls `callJson`, persists `ai_rating_*` fields to the row on success, leaves them null on failure. Also runs a sanity post-check (score ≥ 80 with sal1 = 0 → log warning).
 
 The campaigns `addSnapshot` action now does **save → rate → return `{ rated: boolean }`** in a single round-trip, so the user sees the rating land within ~10s of submission. A separate `rerateSnapshot` action exposes the recovery path; the snapshot card's dropdown shows "Rate" if `ai_rating_score is null`, "Re-rate" otherwise.
+
+### M7 — Projects
+
+`lib/schemas/project.ts` Zod schemas (input + update + status-only update). `app/(app)/projects/actions.ts` for `createProject`, `updateProject`, `deleteProject`, `moveProjectStatus` (used by kanban drag).
+
+UI: `/projects` is a Tabs container with two views over the same data — a 4-column kanban (`KanbanBoard` with native HTML5 drag, no extra library) where dragging a card across columns calls `moveProjectStatus`, and a list view (`ProjectList` table) for keyboard-friendly browsing. Cards show title, owner, due date (overdue → destructive colour), progress bar (gold), and linked-campaign count.
+
+`/projects/[id]` detail page composes `ProjectDetailForm` (client) — title/owner/status/due-date/progress slider in one card, `@uiw/react-md-editor` for `notes_markdown` (dynamic-imported, SSR off), and a checkbox grid of campaigns to link/unlink. Single "Save changes" persists everything; separate "Delete project" with confirm.
