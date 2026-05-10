@@ -97,3 +97,11 @@ A11y: every input has `<Label htmlFor>`, `aria-current="page"` on active nav lin
 Server actions (`app/(app)/funnel/actions.ts`): `addFunnelEntry`, `updateFunnelEntry`, `deleteFunnelEntry`, `bulkAddWeek`. Each scopes by `auth.uid()`, snaps `week_start` to ISO Monday, and surfaces the unique-key violation (`23505`) as a friendly toast. `bulkAddWeek` skips fully-zero rows and `upsert`s by the unique tuple to allow re-saves.
 
 UI: `/funnel` uses Tabs — "Add one row" (single-row form), "Bulk add week" (12-row grid, 3 platforms × 4 countries), "All entries" (TanStack Table with platform/country/week-prefix filters, sortable, edit dialog, delete confirm). All lists are RSC-fetched, mutations revalidate `/funnel` and `/`.
+
+### M5 — Campaigns + funnel snapshots (no AI yet)
+
+`lib/schemas/campaign.ts` for campaign and snapshot Zod schemas. `app/(app)/campaigns/actions.ts` for `createCampaign`, `updateCampaign`, `deleteCampaign`, `addSnapshot`, `deleteSnapshot`. `addSnapshot` returns `{ rated: false }` for now — M6 wires AI rating into the same flow.
+
+UI: `/campaigns` list table with `NewCampaignDialog`. `/campaigns/[id]` detail page with header (name, platform, country, status badge, dates, budget, notes), snapshot upload form, two-column layout with `CampaignTrend` Recharts mini-chart (spend on left axis, SAL1 on right, brand palette). Snapshot list as cards with metrics table, AI rating badge slot (empty placeholder until M6), and rationale + recommendations slot.
+
+`components/campaigns/rating-badge.tsx` is the shared band-coloured score badge — used here and by the overview top/bottom list in M10.
