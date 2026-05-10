@@ -71,3 +71,13 @@ Configure the Supabase Auth dashboard with redirect URLs for both `http://localh
 ### M1 — Bootstrap
 
 Scaffolded Next.js 16 + Tailwind v4 via `create-next-app`. Installed core deps: Supabase SSR/JS, Anthropic SDK, RHF + Zod, TanStack Table, Recharts, date-fns, shadcn primitives (Base UI), sonner, MD editor. Wired TFO design tokens into `globals.css` mapped onto shadcn semantic tokens. Set up Prettier, env-var Zod loader, vercel.json (region `fra1`).
+
+### M2 — Supabase + auth
+
+Wrote `supabase/migrations/0001_init.sql` — full schema (5 enums, 6 tables, `monthly_actuals` view, `apply_reallocation` PG function, RLS policies, `updated_at` triggers, indexes). Created hand-written `lib/supabase/database.types.ts` placeholder (regenerate via `pnpm db:types` after linking).
+
+Built three Supabase clients (`@supabase/ssr`): browser, server (with awaited `cookies()` per Next 16), and middleware/proxy session-refresh helper. Added admin (service-role) client guarded by `import "server-only"`.
+
+Implemented magic-link auth: `/login` page + RHF form + server action that pre-validates `ALLOWED_EMAIL` before calling `signInWithOtp`. `/auth/callback` route re-checks email after code exchange and signs out on mismatch. `/auth/auth-code-error` page for friendly failure UX. `(app)` route group has an auth-guarded layout (`force-dynamic`) and a stub overview at `/`.
+
+**Note:** Next.js 16 renamed `middleware.ts` → `proxy.ts` (function exported as `proxy`). All session-refresh logic lives in `proxy.ts` calling `lib/supabase/middleware.ts:updateSession()`.
