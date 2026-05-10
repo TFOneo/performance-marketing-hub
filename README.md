@@ -89,3 +89,11 @@ Built fixed 240px left sidebar (`components/layout/sidebar.tsx`) with active-rou
 `(app)` layout composes the shell, gates auth (`force-dynamic`), and passes the user email to the header. Stub pages exist for `/funnel`, `/campaigns`, `/projects`, `/budget`. Loading and error boundaries (`loading.tsx`, `error.tsx`, `not-found.tsx`) wired at the route-group level.
 
 A11y: every input has `<Label htmlFor>`, `aria-current="page"` on active nav link, focus rings preserved on user-menu trigger, `aria-busy` on loading skeletons, `role="alert"` on form errors.
+
+### M4 — Weekly funnel
+
+`lib/utils/week.ts` for ISO Monday helpers. `lib/schemas/{enums,funnel}.ts` for shared Zod enums and funnel-input schemas (with coercion of stringified numbers from inputs).
+
+Server actions (`app/(app)/funnel/actions.ts`): `addFunnelEntry`, `updateFunnelEntry`, `deleteFunnelEntry`, `bulkAddWeek`. Each scopes by `auth.uid()`, snaps `week_start` to ISO Monday, and surfaces the unique-key violation (`23505`) as a friendly toast. `bulkAddWeek` skips fully-zero rows and `upsert`s by the unique tuple to allow re-saves.
+
+UI: `/funnel` uses Tabs — "Add one row" (single-row form), "Bulk add week" (12-row grid, 3 platforms × 4 countries), "All entries" (TanStack Table with platform/country/week-prefix filters, sortable, edit dialog, delete confirm). All lists are RSC-fetched, mutations revalidate `/funnel` and `/`.
