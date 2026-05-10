@@ -81,3 +81,11 @@ Built three Supabase clients (`@supabase/ssr`): browser, server (with awaited `c
 Implemented magic-link auth: `/login` page + RHF form + server action that pre-validates `ALLOWED_EMAIL` before calling `signInWithOtp`. `/auth/callback` route re-checks email after code exchange and signs out on mismatch. `/auth/auth-code-error` page for friendly failure UX. `(app)` route group has an auth-guarded layout (`force-dynamic`) and a stub overview at `/`.
 
 **Note:** Next.js 16 renamed `middleware.ts` → `proxy.ts` (function exported as `proxy`). All session-refresh logic lives in `proxy.ts` calling `lib/supabase/middleware.ts:updateSession()`.
+
+### M3 — Layout shell + design tokens
+
+Built fixed 240px left sidebar (`components/layout/sidebar.tsx`) with active-route-aware nav and lucide icons. Built sticky top header with `UserMenu` dropdown (Base UI dropdown-menu); sign-out via `useTransition` + server action. `PageHeader` component for consistent title/description/actions slot per route.
+
+`(app)` layout composes the shell, gates auth (`force-dynamic`), and passes the user email to the header. Stub pages exist for `/funnel`, `/campaigns`, `/projects`, `/budget`. Loading and error boundaries (`loading.tsx`, `error.tsx`, `not-found.tsx`) wired at the route-group level.
+
+A11y: every input has `<Label htmlFor>`, `aria-current="page"` on active nav link, focus rings preserved on user-menu trigger, `aria-busy` on loading skeletons, `role="alert"` on form errors.
