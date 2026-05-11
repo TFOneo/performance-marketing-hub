@@ -33,7 +33,7 @@ export async function signInWithPassword(formData: FormData): Promise<SignInResu
   });
 
   if (error) {
-    return { ok: false, error: "Invalid email or password." };
+    return { ok: false, error: `${error.message} (${error.status ?? error.code})` };
   }
 
   redirect("/");
