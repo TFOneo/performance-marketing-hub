@@ -1,20 +1,24 @@
 "use server";
 
-import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { serverEnv } from "@/lib/env";
 
 const inputSchema = z.object({
   email: z.string().email().toLowerCase().trim(),
+  password: z.string().min(1, "Password is required."),
 });
 
-type SignInResult = { ok: true } | { ok: false; error: string };
+type SignInResult = { ok: false; error: string };
 
-export async function requestMagicLink(formData: FormData): Promise<SignInResult> {
-  const parsed = inputSchema.safeParse({ email: formData.get("email") });
+export async function signInWithPassword(formData: FormData): Promise<SignInResult> {
+  const parsed = inputSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
   if (!parsed.success) {
-    return { ok: false, error: "Please enter a valid email address." };
+    return { ok: false, error: parsed.error.issues[0]?.message ?? "Invalid input." };
   }
 
   const env = serverEnv();
@@ -22,28 +26,15 @@ export async function requestMagicLink(formData: FormData): Promise<SignInResult
     return { ok: false, error: "This email is not authorised for this app." };
   }
 
-  const hdrs = await headers();
-  const origin =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    (() => {
-      const proto = hdrs.get("x-forwarded-proto") ?? "http";
-      const host = hdrs.get("host");
-      return `${proto}://${host}`;
-    })();
-
-  const redirectTo = `${origin}/auth/callback`;
-  console.log("[auth] origin:", origin, "redirectTo:", redirectTo);
-
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({
+  const { error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
-    options: { emailRedirectTo: redirectTo },
+    password: parsed.data.password,
   });
 
   if (error) {
-    console.error("[auth] signInWithOtp error:", error.message, error.status, error.code);
-    return { ok: false, error: `${error.message} (status: ${error.status})` };
+    return { ok: false, error: "Invalid email or password." };
   }
 
-  return { ok: true };
+  redirect("/");
 }

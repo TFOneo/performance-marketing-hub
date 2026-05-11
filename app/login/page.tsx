@@ -11,7 +11,7 @@ export default function LoginPage() {
         <header className="mb-6 space-y-1">
           <h1 className="text-2xl">TFO Performance Marketing</h1>
           <p className="text-muted-foreground text-sm">
-            Sign in with your authorised email to receive a magic link.
+            Sign in with your authorised email and password.
           </p>
         </header>
         <LoginForm />
