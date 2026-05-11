@@ -1,264 +1,460 @@
-// Hand-written placeholder. Regenerate after linking the Supabase project:
-//   pnpm db:types
-// (runs: supabase gen types typescript --linked --schema public > lib/supabase/database.types.ts)
-
 export type Json =
   | string
   | number
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | Json[];
+  | Json[]
 
-export type PlatformT = "google" | "meta" | "linkedin";
-export type CountryT = "KSA" | "UAE" | "Kuwait" | "Bahrain";
-export type CampaignStatusT = "active" | "paused" | "ended";
-export type ProjectStatusT = "not_started" | "in_progress" | "blocked" | "done";
-export type SuggestionStatusT = "pending" | "applied" | "dismissed";
-
-interface FunnelMetrics {
-  spend_usd: number;
-  leads: number;
-  sql1: number;
-  sql2: number;
-  sal1: number;
-  sal2: number;
-  client: number;
-}
-
-export interface Database {
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   public: {
     Tables: {
-      weekly_funnel: {
-        Row: {
-          id: string;
-          user_id: string;
-          week_start: string;
-          platform: PlatformT;
-          country: CountryT;
-          spend_usd: number;
-          leads: number;
-          sql1: number;
-          sql2: number;
-          sal1: number;
-          sal2: number;
-          client: number;
-          notes: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: Partial<FunnelMetrics> & {
-          id?: string;
-          user_id: string;
-          week_start: string;
-          platform: PlatformT;
-          country: CountryT;
-          notes?: string | null;
-        };
-        Update: Partial<FunnelMetrics> & {
-          notes?: string | null;
-          week_start?: string;
-          platform?: PlatformT;
-          country?: CountryT;
-        };
-        Relationships: [];
-      };
-      campaigns: {
-        Row: {
-          id: string;
-          user_id: string;
-          name: string;
-          platform: PlatformT;
-          country: CountryT;
-          status: CampaignStatusT;
-          start_date: string | null;
-          end_date: string | null;
-          total_budget_usd: number | null;
-          notes: string | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          name: string;
-          platform: PlatformT;
-          country: CountryT;
-          status?: CampaignStatusT;
-          start_date?: string | null;
-          end_date?: string | null;
-          total_budget_usd?: number | null;
-          notes?: string | null;
-        };
-        Update: {
-          name?: string;
-          platform?: PlatformT;
-          country?: CountryT;
-          status?: CampaignStatusT;
-          start_date?: string | null;
-          end_date?: string | null;
-          total_budget_usd?: number | null;
-          notes?: string | null;
-        };
-        Relationships: [];
-      };
-      campaign_funnel_entries: {
-        Row: {
-          id: string;
-          user_id: string;
-          campaign_id: string;
-          period_start: string;
-          period_end: string;
-          spend_usd: number;
-          leads: number;
-          sql1: number;
-          sql2: number;
-          sal1: number;
-          sal2: number;
-          client: number;
-          ai_rating_score: number | null;
-          ai_rating_band: string | null;
-          ai_rating_rationale: string | null;
-          ai_recommendations: Json | null;
-          ai_rated_at: string | null;
-          created_at: string;
-        };
-        Insert: Partial<FunnelMetrics> & {
-          id?: string;
-          user_id: string;
-          campaign_id: string;
-          period_start: string;
-          period_end: string;
-        };
-        Update: Partial<FunnelMetrics> & {
-          period_start?: string;
-          period_end?: string;
-          ai_rating_score?: number | null;
-          ai_rating_band?: string | null;
-          ai_rating_rationale?: string | null;
-          ai_recommendations?: Json | null;
-          ai_rated_at?: string | null;
-        };
-        Relationships: [];
-      };
-      projects: {
-        Row: {
-          id: string;
-          user_id: string;
-          title: string;
-          owner: string | null;
-          status: ProjectStatusT;
-          progress_pct: number;
-          due_date: string | null;
-          notes_markdown: string | null;
-          linked_campaign_ids: string[];
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          user_id: string;
-          title: string;
-          owner?: string | null;
-          status?: ProjectStatusT;
-          progress_pct?: number;
-          due_date?: string | null;
-          notes_markdown?: string | null;
-          linked_campaign_ids?: string[];
-        };
-        Update: {
-          title?: string;
-          owner?: string | null;
-          status?: ProjectStatusT;
-          progress_pct?: number;
-          due_date?: string | null;
-          notes_markdown?: string | null;
-          linked_campaign_ids?: string[];
-        };
-        Relationships: [];
-      };
       budgets: {
         Row: {
-          id: string;
-          user_id: string;
-          month: string;
-          platform: PlatformT;
-          country: CountryT;
-          planned_usd: number;
-          created_at: string;
-          updated_at: string;
-        };
+          country: Database["public"]["Enums"]["country_t"]
+          created_at: string
+          id: string
+          month: string
+          planned_usd: number
+          platform: Database["public"]["Enums"]["platform_t"]
+          updated_at: string
+          user_id: string
+        }
         Insert: {
-          id?: string;
-          user_id: string;
-          month: string;
-          platform: PlatformT;
-          country: CountryT;
-          planned_usd?: number;
-        };
+          country: Database["public"]["Enums"]["country_t"]
+          created_at?: string
+          id?: string
+          month: string
+          planned_usd?: number
+          platform: Database["public"]["Enums"]["platform_t"]
+          updated_at?: string
+          user_id: string
+        }
         Update: {
-          month?: string;
-          platform?: PlatformT;
-          country?: CountryT;
-          planned_usd?: number;
-        };
-        Relationships: [];
-      };
+          country?: Database["public"]["Enums"]["country_t"]
+          created_at?: string
+          id?: string
+          month?: string
+          planned_usd?: number
+          platform?: Database["public"]["Enums"]["platform_t"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      campaign_funnel_entries: {
+        Row: {
+          ai_rated_at: string | null
+          ai_rating_band: string | null
+          ai_rating_rationale: string | null
+          ai_rating_score: number | null
+          ai_recommendations: Json | null
+          campaign_id: string
+          client: number
+          created_at: string
+          id: string
+          leads: number
+          period_end: string
+          period_start: string
+          sal1: number
+          sal2: number
+          spend_usd: number
+          sql1: number
+          sql2: number
+          user_id: string
+        }
+        Insert: {
+          ai_rated_at?: string | null
+          ai_rating_band?: string | null
+          ai_rating_rationale?: string | null
+          ai_rating_score?: number | null
+          ai_recommendations?: Json | null
+          campaign_id: string
+          client?: number
+          created_at?: string
+          id?: string
+          leads?: number
+          period_end: string
+          period_start: string
+          sal1?: number
+          sal2?: number
+          spend_usd?: number
+          sql1?: number
+          sql2?: number
+          user_id: string
+        }
+        Update: {
+          ai_rated_at?: string | null
+          ai_rating_band?: string | null
+          ai_rating_rationale?: string | null
+          ai_rating_score?: number | null
+          ai_recommendations?: Json | null
+          campaign_id?: string
+          client?: number
+          created_at?: string
+          id?: string
+          leads?: number
+          period_end?: string
+          period_start?: string
+          sal1?: number
+          sal2?: number
+          spend_usd?: number
+          sql1?: number
+          sql2?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_funnel_entries_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          country: Database["public"]["Enums"]["country_t"]
+          created_at: string
+          end_date: string | null
+          id: string
+          name: string
+          notes: string | null
+          platform: Database["public"]["Enums"]["platform_t"]
+          start_date: string | null
+          status: Database["public"]["Enums"]["campaign_status_t"]
+          total_budget_usd: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country: Database["public"]["Enums"]["country_t"]
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          platform: Database["public"]["Enums"]["platform_t"]
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["campaign_status_t"]
+          total_budget_usd?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          country?: Database["public"]["Enums"]["country_t"]
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          platform?: Database["public"]["Enums"]["platform_t"]
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["campaign_status_t"]
+          total_budget_usd?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          created_at: string
+          due_date: string | null
+          id: string
+          linked_campaign_ids: string[]
+          notes_markdown: string | null
+          owner: string | null
+          progress_pct: number
+          status: Database["public"]["Enums"]["project_status_t"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          linked_campaign_ids?: string[]
+          notes_markdown?: string | null
+          owner?: string | null
+          progress_pct?: number
+          status?: Database["public"]["Enums"]["project_status_t"]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          linked_campaign_ids?: string[]
+          notes_markdown?: string | null
+          owner?: string | null
+          progress_pct?: number
+          status?: Database["public"]["Enums"]["project_status_t"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reallocation_runs: {
         Row: {
-          id: string;
-          user_id: string;
-          generated_at: string;
-          lookback_weeks: number;
-          payload: Json;
-          status: SuggestionStatusT;
-          applied_move_index: number | null;
-          applied_at: string | null;
-          created_at: string;
-        };
+          applied_at: string | null
+          applied_move_index: number | null
+          created_at: string
+          generated_at: string
+          id: string
+          lookback_weeks: number
+          payload: Json
+          status: Database["public"]["Enums"]["suggestion_status_t"]
+          user_id: string
+        }
         Insert: {
-          id?: string;
-          user_id: string;
-          lookback_weeks?: number;
-          payload: Json;
-          status?: SuggestionStatusT;
-        };
+          applied_at?: string | null
+          applied_move_index?: number | null
+          created_at?: string
+          generated_at?: string
+          id?: string
+          lookback_weeks?: number
+          payload: Json
+          status?: Database["public"]["Enums"]["suggestion_status_t"]
+          user_id: string
+        }
         Update: {
-          status?: SuggestionStatusT;
-          applied_move_index?: number | null;
-          applied_at?: string | null;
-        };
-        Relationships: [];
-      };
-    };
+          applied_at?: string | null
+          applied_move_index?: number | null
+          created_at?: string
+          generated_at?: string
+          id?: string
+          lookback_weeks?: number
+          payload?: Json
+          status?: Database["public"]["Enums"]["suggestion_status_t"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      weekly_funnel: {
+        Row: {
+          client: number
+          country: Database["public"]["Enums"]["country_t"]
+          created_at: string
+          id: string
+          leads: number
+          notes: string | null
+          platform: Database["public"]["Enums"]["platform_t"]
+          sal1: number
+          sal2: number
+          spend_usd: number
+          sql1: number
+          sql2: number
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          client?: number
+          country: Database["public"]["Enums"]["country_t"]
+          created_at?: string
+          id?: string
+          leads?: number
+          notes?: string | null
+          platform: Database["public"]["Enums"]["platform_t"]
+          sal1?: number
+          sal2?: number
+          spend_usd?: number
+          sql1?: number
+          sql2?: number
+          updated_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          client?: number
+          country?: Database["public"]["Enums"]["country_t"]
+          created_at?: string
+          id?: string
+          leads?: number
+          notes?: string | null
+          platform?: Database["public"]["Enums"]["platform_t"]
+          sal1?: number
+          sal2?: number
+          spend_usd?: number
+          sql1?: number
+          sql2?: number
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
+    }
     Views: {
       monthly_actuals: {
         Row: {
-          user_id: string;
-          month: string;
-          platform: PlatformT;
-          country: CountryT;
-          actual_usd: number;
-          leads: number;
-          sal1: number;
-          cost_per_sal1: number | null;
-        };
-        Relationships: [];
-      };
-    };
+          actual_usd: number | null
+          cost_per_sal1: number | null
+          country: Database["public"]["Enums"]["country_t"] | null
+          leads: number | null
+          month: string | null
+          platform: Database["public"]["Enums"]["platform_t"] | null
+          sal1: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+    }
     Functions: {
       apply_reallocation: {
-        Args: { p_run_id: string; p_move_index: number };
-        Returns: void;
-      };
-    };
+        Args: { p_move_index: number; p_run_id: string }
+        Returns: undefined
+      }
+    }
     Enums: {
-      platform_t: PlatformT;
-      country_t: CountryT;
-      campaign_status_t: CampaignStatusT;
-      project_status_t: ProjectStatusT;
-      suggestion_status_t: SuggestionStatusT;
-    };
-    CompositeTypes: Record<string, never>;
-  };
+      campaign_status_t: "active" | "paused" | "ended"
+      country_t: "KSA" | "UAE" | "Kuwait" | "Bahrain"
+      platform_t: "google" | "meta" | "linkedin"
+      project_status_t: "not_started" | "in_progress" | "blocked" | "done"
+      suggestion_status_t: "pending" | "applied" | "dismissed"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      campaign_status_t: ["active", "paused", "ended"],
+      country_t: ["KSA", "UAE", "Kuwait", "Bahrain"],
+      platform_t: ["google", "meta", "linkedin"],
+      project_status_t: ["not_started", "in_progress", "blocked", "done"],
+      suggestion_status_t: ["pending", "applied", "dismissed"],
+    },
+  },
+} as const
