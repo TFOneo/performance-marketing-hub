@@ -31,15 +31,18 @@ export async function requestMagicLink(formData: FormData): Promise<SignInResult
       return `${proto}://${host}`;
     })();
 
+  const redirectTo = `${origin}/auth/callback`;
+  console.log("[auth] origin:", origin, "redirectTo:", redirectTo);
+
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
     email: parsed.data.email,
-    options: { emailRedirectTo: `${origin}/auth/callback` },
+    options: { emailRedirectTo: redirectTo },
   });
 
   if (error) {
-    console.error("[auth] signInWithOtp error:", error.message, error.status);
-    return { ok: false, error: `Magic link failed: ${error.message}` };
+    console.error("[auth] signInWithOtp error:", error.message, error.status, error.code);
+    return { ok: false, error: `${error.message} (status: ${error.status})` };
   }
 
   return { ok: true };
