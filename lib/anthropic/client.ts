@@ -9,9 +9,10 @@ const REQUEST_TIMEOUT_MS = 30_000;
 
 let client: Anthropic | null = null;
 
-function getClient(): Anthropic {
+function getClient(): Anthropic | null {
   if (client) return client;
   const env = serverEnv();
+  if (!env.ANTHROPIC_API_KEY) return null;
   client = new Anthropic({
     apiKey: env.ANTHROPIC_API_KEY,
     maxRetries: 0, // we handle retries explicitly so logging is clear
@@ -41,6 +42,9 @@ async function callOnce(opts: {
   maxTokens: number;
 }): Promise<{ ok: true; text: string } | { ok: false; error: string; retryable: boolean }> {
   const c = getClient();
+  if (!c) {
+    return { ok: false, error: "AI features are not yet configured — API key pending from IT.", retryable: false };
+  }
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
