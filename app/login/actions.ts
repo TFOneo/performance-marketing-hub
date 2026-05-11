@@ -23,9 +23,13 @@ export async function requestMagicLink(formData: FormData): Promise<SignInResult
   }
 
   const hdrs = await headers();
-  const proto = hdrs.get("x-forwarded-proto") ?? "http";
-  const host = hdrs.get("host");
-  const origin = `${proto}://${host}`;
+  const origin =
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (() => {
+      const proto = hdrs.get("x-forwarded-proto") ?? "http";
+      const host = hdrs.get("host");
+      return `${proto}://${host}`;
+    })();
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithOtp({
